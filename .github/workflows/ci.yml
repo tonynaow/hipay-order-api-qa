@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_live_stage_tests:
+        description: 'Rejouer les scenarios @smoke contre le vrai staging HiPay'
+        type: boolean
+        default: false
+
+jobs:
+  lint-and-mock-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint JS
+        run: npm run lint
+
+      - name: Lint Gherkin
+        run: npm run lint:gherkin
+
+      - name: Start mock server
+        run: |
+          node mock-server/server.js &
+          npx wait-on http://localhost:3000/v1/connector/healthcheck
+        env:
+          MOCK_API_LOGIN: test-login
+          MOCK_API_PASSWORD: test-password
+
+      - name: Run BDD suite against mock
+        run: npm run test:report
+        env:
+          TEST_ENV: mock
+          MOCK_API_LOGIN: test-login
+          MOCK_API_PASSWORD: test-password
+
+      - name: Upload execution report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: execution-report
+          path: output/
+
+  live-stage-tests:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_live_stage_tests
+    runs-on: ubuntu-latest
+    needs: lint-and-mock-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run smoke suite against real HiPay stage
+        run: npm run test:smoke
+        env:
+          TEST_ENV: stage
+          HIPAY_API_LOGIN: ${{ secrets.HIPAY_API_LOGIN }}
+          HIPAY_API_PASSWORD: ${{ secrets.HIPAY_API_PASSWORD }}

@@ -1,0 +1,11 @@
+services:
+  mock-server:
+    build:
+      context: .
+      dockerfile: mock-server/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      MOCK_API_LOGIN: ${MOCK_API_LOGIN:-test-login}
+      MOCK_API_PASSWORD: ${MOCK_API_PASSWORD:-test-password}
+      MOCK_SERVER_PORT: 3000

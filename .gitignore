@@ -1,0 +1,8 @@
+node_modules/
+.env
+output/
+mochawesome-report/
+*.log
+
+# Notes personnelles de préparation, non destinées au livrable
+INTERVIEW-PREP.md

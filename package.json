@@ -1,0 +1,31 @@
+{
+  "name": "hipay-order-api-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Suite d'automatisation BDD (CodeceptJS + Gherkin + Page Object) pour l'endpoint HiPay POST /v1/connector/order",
+  "scripts": {
+    "mock:start": "node mock-server/server.js",
+    "test": "codeceptjs run --steps",
+    "test:report": "codeceptjs run --steps --reporter mochawesome --reporter-options reportDir=output,reportFilename=execution-report",
+    "test:smoke": "codeceptjs run --steps --grep @smoke",
+    "lint": "eslint .",
+    "lint:gherkin": "gherkin-lint features",
+    "lint:all": "npm run lint && npm run lint:gherkin"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "axios": "^1.20.0",
+    "codeceptjs": "^4.1.0",
+    "dotenv": "^17.4.2",
+    "eslint": "^10.10.0",
+    "gherkin-lint": "^4.2.4",
+    "globals": "^17.12.0",
+    "mocha": "^10.8.2",
+    "mochawesome": "^8.0.1",
+    "wait-on": "^9.1.0"
+  }
+}
